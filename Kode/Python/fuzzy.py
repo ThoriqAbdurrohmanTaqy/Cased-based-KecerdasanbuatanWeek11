@@ -55,20 +55,21 @@ def get_kelayakan_score(pelayanan_val, harga_val):
     """Menghitung skor kelayakan menggunakan metode Sugeno berdasarkan nilai pelayanan dan harga"""
     """Output Sugeno: Rendah = 50, Sedang = 75, Tinggi = 100"""
     """metode yang digunakan adalah weighted average, dimana setiap aturan memiliki bobot yang dihitung dari derajat keanggotaan input dan nilai output yang telah ditentukan"""
-    
+
 
     p = fuzzify_pelayanan(pelayanan_val)
     h = fuzzify_harga(harga_val)
     
     # Output Sugeno (Singletons)
-    # Rendah = 50, Sedang = 75, Tinggi = 100
-    R, S, T = 50, 75, 100 # Definisi nilai output
+    # Rendah = 50, Sedang = 75, Tinggi = 90, Sangat Tinggi = 100
+    R, S, T, ST = 50, 75, 90, 100 # Definisi nilai output
 
     rules = []
     
     # Kumpulan Aturan (Inference Rules)
     # IF Pelayanan ... AND Harga ... THEN Kelayakan ...
     # Kita menggunakan MIN untuk operasi AND
+    
     
     # 1. Pelayanan Buruk
     rules.append((min(p['buruk'], h['murah']), S))   # Buruk + Murah = Sedang
@@ -81,7 +82,7 @@ def get_kelayakan_score(pelayanan_val, harga_val):
     rules.append((min(p['biasa'], h['mahal']), R))   # Biasa + Mahal = Rendah
     
     # 3. Pelayanan Bagus
-    rules.append((min(p['bagus'], h['murah']), T))   # Bagus + Murah = Sangat Tinggi (T)
+    rules.append((min(p['bagus'], h['murah']), ST))  # Bagus + Murah = Sangat Tinggi (ST)
     rules.append((min(p['bagus'], h['sedang']), T))  # Bagus + Sedang = Tinggi
     rules.append((min(p['bagus'], h['mahal']), S))   # Bagus + Mahal = Sedang
     
@@ -111,8 +112,8 @@ def main():
                 'total_score': score
             })
 
-    # Urutkan berdasarkan skor tertinggi
-    data.sort(key=lambda x: x['total_score'], reverse=True)
+    # Urutkan berdasarkan skor tertinggi, pelayanan tertinggi, dan harga terendah
+    data.sort(key=lambda x: (x['total_score'], x['pelayanan'], -x['harga']), reverse=True)
 
     # Simpan hasil Top 5
     wb_ranking = openpyxl.Workbook()
