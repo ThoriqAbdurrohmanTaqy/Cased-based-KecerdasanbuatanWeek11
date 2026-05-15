@@ -120,11 +120,21 @@ def main():
     sheet_ranking = wb_ranking.active
     sheet_ranking.title = "Ranking Restoran"
     
-    headers = ["ID Restoran", "Kualitas Pelayanan", "Harga", "Skor Kelayakan"]
+    headers = ["ID Restoran", "Kualitas Pelayanan", "Harga", "Skor Kelayakan", "Kesimpulan"]
     sheet_ranking.append(headers)
     
     for d in data[:5]:
-        sheet_ranking.append([d['id'], d['pelayanan'], d['harga'], round(d['total_score'], 2)])
+        score = d['total_score']
+        if score >= 95:
+            kesimpulan = "Sangat Layak (Pilihan Utama)"
+        elif score >= 85:
+            kesimpulan = "Layak (Direkomendasikan)"
+        elif score >= 75:
+            kesimpulan = "Cukup Layak"
+        else:
+            kesimpulan = "Kurang Layak"
+            
+        sheet_ranking.append([d['id'], d['pelayanan'], d['harga'], round(score, 2), kesimpulan])
     
     wb_ranking.save('ranking.xlsx')
     print("Selesai! 5 Restoran terbaik telah disimpan di ranking.xlsx")
